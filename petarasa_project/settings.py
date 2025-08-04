@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'kuliner',
+    'cloudinary', 
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -140,13 +142,18 @@ STORAGES = {
     },
 }
 
-# Pengaturan untuk file yang di-upload pengguna.
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-
 # ==============================================================================
 # PENGATURAN LAINNYA
 # ==============================================================================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Pengaturan Cloudinary untuk Media Files
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'nama_cloud_anda',
+    'API_KEY': 'api_key_anda',
+    'API_SECRET': 'api_secret_anda',
+}
+
+# Gunakan Cloudinary untuk menyimpan file yang di-upload
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
