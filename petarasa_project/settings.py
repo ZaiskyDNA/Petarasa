@@ -27,7 +27,7 @@ if RAILWAY_HOSTNAME:
     
 # Tambahkan domain utama Anda secara manual
 # Ganti dengan domain Anda jika berbeda
-ALLOWED_HOSTS.append('web-production-c2d5.up.railway.app')
+ALLOWED_HOSTS.append('petarasa.up.railway.app')
 
 # Railway akan menyediakan hostname ini secara otomatis.
 RAILWAY_STATIC_HOSTNAME = os.environ.get('RAILWAY_STATIC_HOSTNAME')
