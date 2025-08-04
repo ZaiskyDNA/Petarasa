@@ -18,7 +18,16 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-_x8wn627c*@!9ulq5@$)b
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 # ALLOWED_HOSTS untuk lokal dan hosting di Railway.
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'web-production-c2d5.up.railway.app']
+ALLOWED_HOSTS = []
+
+# Ambil nama domain dari environment variable Railway
+RAILWAY_HOSTNAME = os.environ.get('RAILWAY_STATIC_HOSTNAME') 
+if RAILWAY_HOSTNAME:
+    ALLOWED_HOSTS.append(RAILWAY_HOSTNAME)
+    
+# Tambahkan domain utama Anda secara manual
+# Ganti dengan domain Anda jika berbeda
+ALLOWED_HOSTS.append('web-production-c2d5.up.railway.app')
 
 # Railway akan menyediakan hostname ini secara otomatis.
 RAILWAY_STATIC_HOSTNAME = os.environ.get('RAILWAY_STATIC_HOSTNAME')
