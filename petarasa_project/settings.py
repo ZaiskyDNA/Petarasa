@@ -18,7 +18,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-_x8wn627c*@!9ulq5@$)b
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 # ALLOWED_HOSTS untuk lokal dan hosting 
-ALLOWED_HOSTS = ['petarasa.vercel.app']
+ALLOWED_HOSTS = ['petarasa.vercel.app',' petarasa-dnxfq1r1q-zaiskydnas-projects.vercel.app']
 
 
 
