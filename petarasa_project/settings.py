@@ -34,6 +34,12 @@ RAILWAY_STATIC_HOSTNAME = os.environ.get('RAILWAY_STATIC_HOSTNAME')
 if RAILWAY_STATIC_HOSTNAME:
     ALLOWED_HOSTS.append(RAILWAY_STATIC_HOSTNAME)
 
+CSRF_TRUSTED_ORIGINS = ['https://petarasa.up.railway.app']
+
+# Pengaturan keamanan tambahan untuk produksi (sangat direkomendasikan)
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 
 # ==============================================================================
 # APLIKASI & MIDDLEWARE
