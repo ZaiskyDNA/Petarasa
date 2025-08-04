@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # <-- Tambahkan Whitenoise di sini
+    'whitenoise.middleware.WhiteNoiseMiddleware',  
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -116,25 +116,21 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Direktori tambahan tempat Django akan mencari file statis.
 STATICFILES_DIRS = [BASE_DIR / 'kuliner/static']
 
-# Penyimpanan file statis yang dioptimalkan oleh Whitenoise.
+# GANTI BLOK STORAGES ANDA DENGAN YANG INI:
 STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
-# ==============================================================================
-# PENGATURAN LAINNYA
-# ==============================================================================
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Pengaturan Cloudinary untuk Media Files
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'nama_cloud_anda',
-    'API_KEY': 'api_key_anda',
-    'API_SECRET': 'api_secret_anda',
+    'CLOUD_NAME': 'dkwam4vpo',
+    'API_KEY': '435236318493894',
+    'API_SECRET': 'aCmlu2v0qd-fZAoYpaEq0oD1HfMQ',
 }
-
-# Gunakan Cloudinary untuk menyimpan file yang di-upload
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
