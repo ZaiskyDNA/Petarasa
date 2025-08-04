@@ -1,0 +1,29 @@
+{% extends "kuliner/base.html" %}
+
+{% block title %}Jalur Rasa - PetaRasa YK{% endblock %}
+
+{% block content %}
+    <div class="text-center mb-5">
+        <h1>Daftar Jalur Rasa</h1>
+        <p class="lead">Ikuti rekomendasi perjalanan kuliner yang telah kami siapkan untuk Anda.</p>
+    </div>
+
+    <div class="row gy-4">
+        {% for jalur in jalur_list %}
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">{{ jalur.nama_jalur }}</h4>
+                    <p class="card-text">{{ jalur.deskripsi }}</p>
+                    <h6 class="mt-3">Rekomendasi Tempat:</h6>
+                    <ul class="list-unstyled">
+                        {% for lokasi in jalur.lokasi.all %}
+                        <li>- <a href="{% url 'detail-lokasi' lokasi.pk %}">{{ lokasi.nama }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

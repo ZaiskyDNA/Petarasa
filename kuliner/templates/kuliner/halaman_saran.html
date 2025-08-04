@@ -1,0 +1,591 @@
+{% extends "kuliner/base.html" %}
+
+{% block title %}Saran Kuliner - PetaRasa YK{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --traditional-gold: #d4af37;
+        --traditional-bronze: #cd7f32;
+        --futuristic-cyan: #00ffff;
+        --futuristic-purple: #8a2be2;
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --text-light: #ffffff;
+        --text-dark: #333333;
+    }
+
+    .recommendation-hero {
+        position: relative;
+        padding: 60px 0 40px 0;
+        overflow: hidden;
+    }
+
+    .recommendation-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--primary-gradient);
+        opacity: 0.15;
+        z-index: -1;
+        border-radius: 20px;
+    }
+
+    .hero-content {
+        text-align: center;
+        margin-bottom: 40px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-title {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--traditional-gold), var(--futuristic-cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 20px;
+        position: relative;
+        animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleGlow {
+        0% { filter: brightness(1); }
+        100% { filter: brightness(1.2); }
+    }
+
+    .hero-title::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 4px;
+        background: var(--secondary-gradient);
+        border-radius: 4px;
+        animation: lineExpand 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes lineExpand {
+        0% { width: 100px; }
+        100% { width: 200px; }
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+
+    .recommendation-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 40px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .recommendation-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .recommendation-card:hover::before {
+        left: 100%;
+    }
+
+    .recommendation-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 35px 70px rgba(0, 0, 0, 0.4);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .form-floating-custom {
+        position: relative;
+        margin-bottom: 25px;
+    }
+
+    .form-floating-custom .form-label-custom {
+        position: absolute;
+        top: -10px;
+        left: 20px;
+        background: var(--glass-bg);
+        padding: 5px 15px;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--traditional-gold);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        padding: 20px 25px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-light);
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+    }
+
+    .form-control-custom:focus {
+        outline: none;
+        border-color: var(--futuristic-cyan);
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .form-control-custom:focus + .form-label-custom {
+        color: var(--futuristic-cyan);
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+
+    .form-control-custom::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+        font-style: italic;
+    }
+
+    .textarea-custom {
+        min-height: 140px;
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    .submit-portal {
+        background: var(--success-gradient);
+        border: none;
+        border-radius: 20px;
+        padding: 18px 40px;
+        color: white;
+        font-weight: 700;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        width: 100%;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-portal::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .submit-portal:hover::before {
+        left: 100%;
+    }
+
+    .submit-portal:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        filter: brightness(1.1);
+    }
+
+    .submit-portal:active {
+        transform: translateY(-2px);
+    }
+
+    /* Floating Icons Animation */
+    .floating-icons {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 3rem;
+        opacity: 0.1;
+        animation: floatIcons 6s ease-in-out infinite;
+    }
+
+    @keyframes floatIcons {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        25% { transform: translateY(-10px) rotate(5deg); }
+        50% { transform: translateY(-20px) rotate(0deg); }
+        75% { transform: translateY(-10px) rotate(-5deg); }
+    }
+
+    /* Success Animation */
+    .submit-success {
+        animation: successPulse 0.6s ease;
+    }
+
+    @keyframes successPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .recommendation-hero {
+            padding: 40px 0 20px 0;
+        }
+
+        .recommendation-card {
+            padding: 25px;
+            border-radius: 20px;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .form-control-custom {
+            padding: 16px 20px;
+            font-size: 1rem;
+        }
+
+        .submit-portal {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+        }
+
+        .floating-icons {
+            display: none;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .recommendation-card {
+            padding: 20px;
+            margin: 0 10px;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .form-floating-custom .form-label-custom {
+            font-size: 0.8rem;
+            padding: 3px 10px;
+        }
+    }
+
+    /* Loading Animation */
+    .recommendation-card {
+        opacity: 0;
+        animation: slideInUp 0.8s ease forwards;
+    }
+
+    .hero-content {
+        opacity: 0;
+        animation: fadeIn 1s ease forwards;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Form Validation Styles */
+    .form-control-custom:valid {
+        border-color: #38ef7d;
+        box-shadow: 0 0 15px rgba(56, 239, 125, 0.3);
+    }
+
+    .form-control-custom:invalid:not(:placeholder-shown) {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+    }
+
+    /* Enhanced Background */
+    .row {
+        position: relative;
+        z-index: 1;
+    }
+
+    .row::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        left: -50px;
+        width: calc(100% + 100px);
+        height: calc(100% + 100px);
+        background: 
+            radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.1) 0%, transparent 50%);
+        z-index: -1;
+        border-radius: 30px;
+    }
+</style>
+
+<div class="recommendation-hero">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="hero-content">
+                <h1 class="hero-title">Rekomendasikan Tempat Kuliner</h1>
+                <p class="hero-subtitle">
+                    🍜 Punya rekomendasi tempat makan otentik di Yogyakarta? <br>
+                    Mari berbagi dan lestarikan kekayaan kuliner Nusantara! 🇮🇩
+                </p>
+            </div>
+                
+                <form action="https://formspree.io/f/mjkooejw" method="POST" id="recommendationForm">
+                    <div class="form-floating-custom">
+                        <input type="text" 
+                               class="form-control-custom" 
+                               id="nama-kuliner" 
+                               name="Nama Kuliner" 
+                               placeholder="Contoh: Gudeg Yu Djum"
+                               required>
+                        <label for="nama-kuliner" class="form-label-custom">
+                            🏪 Nama Kuliner / Tempat Makan
+                        </label>
+                    </div>
+
+                    <div class="form-floating-custom">
+                        <input type="text" 
+                               class="form-control-custom" 
+                               id="lokasi-kuliner" 
+                               name="Lokasi" 
+                               placeholder="Contoh: Jl. Malioboro No. 123 atau dekat Tugu Jogja" 
+                               required>
+                        <label for="lokasi-kuliner" class="form-label-custom">
+                            📍 Lokasi / Alamat Kuliner
+                        </label>
+                    </div>
+
+                    <div class="form-floating-custom">
+                        <textarea class="form-control-custom textarea-custom" 
+                                  id="keterangan" 
+                                  name="Keterangan" 
+                                  placeholder="Contoh: Menjual gudeg kering yang legendaris, buka hanya malam hari. Harga terjangkau mulai dari Rp 15.000. Tempat favorit warga lokal!"></textarea>
+                        <label for="keterangan" class="form-label-custom">
+                            📝 Keterangan Tambahan
+                        </label>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="submit-portal" id="submitBtn">
+                            🚀 Kirim Saran Kuliner
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('recommendationForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const formInputs = document.querySelectorAll('.form-control-custom');
+
+        // Enhanced form interactions
+        formInputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+                this.parentElement.style.zIndex = '10';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+                this.parentElement.style.zIndex = '1';
+            });
+
+            // Real-time validation feedback
+            input.addEventListener('input', function() {
+                if (this.value.length > 0) {
+                    this.classList.add('has-content');
+                } else {
+                    this.classList.remove('has-content');
+                }
+            });
+        });
+
+        // Form submission with enhanced feedback
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Add loading state
+            submitBtn.innerHTML = '⏳ Mengirim...';
+            submitBtn.disabled = true;
+            submitBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+
+            // Simulate form submission (replace with actual submission)
+            setTimeout(() => {
+                // Success state
+                submitBtn.innerHTML = '✅ Terkirim!';
+                submitBtn.classList.add('submit-success');
+                submitBtn.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+                
+                // Reset form
+                form.reset();
+                formInputs.forEach(input => {
+                    input.classList.remove('has-content');
+                });
+
+                // Reset button after delay
+                setTimeout(() => {
+                    submitBtn.innerHTML = '🚀 Kirim Saran Kuliner';
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('submit-success');
+                }, 3000);
+
+                // Show thank you message
+                showThankYouMessage();
+            }, 2000);
+
+            // Actually submit the form to Formspree
+            fetch(form.action, {
+                method: form.method,
+                body: new FormData(form),
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+        });
+
+        // Thank you message
+        function showThankYouMessage() {
+            const thankYouDiv = document.createElement('div');
+            thankYouDiv.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: var(--glass-bg);
+                    backdrop-filter: blur(20px);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 20px;
+                    padding: 30px;
+                    text-align: center;
+                    color: white;
+                    z-index: 1000;
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                    animation: popIn 0.5s ease;
+                ">
+                    <h3 style="color: var(--traditional-gold); margin-bottom: 15px;">🎉 Terima Kasih!</h3>
+                    <p>Saran kuliner Anda telah diterima dan akan kami review segera.</p>
+                    <p style="font-size: 0.9rem; opacity: 0.8;">Mari bersama lestarikan kuliner Nusantara! 🍜</p>
+                </div>
+            `;
+            
+            document.body.appendChild(thankYouDiv);
+            
+            setTimeout(() => {
+                thankYouDiv.remove();
+            }, 4000);
+        }
+
+        // Auto-resize textarea
+        const textarea = document.getElementById('keterangan');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(140, this.scrollHeight) + 'px';
+        });
+
+        // Add ripple effect to submit button
+        submitBtn.addEventListener('click', function(e) {
+            if (!this.disabled) {
+                let ripple = document.createElement('span');
+                ripple.classList.add('ripple-effect');
+                
+                let rect = this.getBoundingClientRect();
+                let size = Math.max(rect.width, rect.height);
+                let x = e.clientX - rect.left - size / 2;
+                let y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                `;
+                
+                this.style.position = 'relative';
+                this.style.overflow = 'hidden';
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+        });
+    });
+
+    // CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

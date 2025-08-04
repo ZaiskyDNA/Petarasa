@@ -1,0 +1,507 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'kuliner/css/main.css' %}">
+    
+    <title>{% block title %}PetaRasa YK{% endblock %}</title>
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --traditional-gold: #d4af37;
+            --traditional-bronze: #cd7f32;
+            --futuristic-cyan: #00ffff;
+            --futuristic-purple: #8a2be2;
+            --dark-bg: #0f0f0f;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --navbar-height: 80px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
+            background-attachment: fixed;
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* FUTURISTIC NAVBAR */
+        .navbar {
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(20px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            height: var(--navbar-height);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .navbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 2s ease;
+        }
+
+        .navbar:hover::before {
+            left: 100%;
+        }
+
+        .navbar-brand {
+            font-family: 'Lora', serif !important;
+            font-size: 1.8rem !important;
+            font-weight: 800 !important;
+            background: linear-gradient(135deg, var(--traditional-gold), var(--futuristic-cyan)) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
+            text-decoration: none !important;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--secondary-gradient);
+            transition: width 0.3s ease;
+        }
+
+        .navbar-brand:hover::after {
+            width: 100%;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .navbar-nav {
+            gap: 10px;
+        }
+
+        .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            padding: 10px 20px !important;
+            border-radius: 25px !important;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-link:hover::before {
+            left: 0;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-link.active {
+            background: var(--secondary-gradient) !important;
+            color: white !important;
+            box-shadow: 0 0 20px rgba(240, 147, 251, 0.4);
+        }
+
+        /* HAMBURGER MENU FOR MOBILE */
+        .navbar-toggler {
+            border: none !important;
+            padding: 4px 8px !important;
+            background: var(--glass-bg) !important;
+            border-radius: 10px !important;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5) !important;
+        }
+
+        .navbar-toggler-icon {
+            background-image: none !important;
+            width: 20px !important;
+            height: 20px !important;
+            position: relative !important;
+        }
+
+        .navbar-toggler-icon::before,
+        .navbar-toggler-icon::after,
+        .navbar-toggler-icon {
+            background: var(--futuristic-cyan) !important;
+            height: 2px !important;
+            border-radius: 2px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .navbar-toggler-icon::before,
+        .navbar-toggler-icon::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%;
+        }
+
+        .navbar-toggler-icon::before {
+            top: -6px;
+        }
+
+        .navbar-toggler-icon::after {
+            bottom: -6px;
+        }
+
+        /* MAIN CONTENT AREA */
+        main.container {
+            margin-top: 40px !important;
+            margin-bottom: 40px !important;
+            min-height: calc(100vh - var(--navbar-height) - 120px);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* FUTURISTIC FOOTER */
+        footer {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px 0 !important;
+            margin-top: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--secondary-gradient);
+            animation: footerGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes footerGlow {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: var(--glass-bg);
+                backdrop-filter: blur(20px);
+                border-radius: 15px;
+                margin-top: 15px;
+                padding: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .navbar-nav {
+                gap: 5px;
+            }
+
+            .nav-link {
+                text-align: center;
+                margin: 5px 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.5rem !important;
+            }
+
+            main.container {
+                margin-top: 20px !important;
+                padding: 0 15px !important;
+            }
+
+            :root {
+                --navbar-height: 70px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-brand {
+                font-size: 1.3rem !important;
+            }
+
+            main.container {
+                padding: 0 10px !important;
+            }
+        }
+
+        /* LOADING ANIMATION */
+        .navbar, main, footer {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        main { animation-delay: 0.2s; }
+        footer { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* SCROLL EFFECTS */
+        .navbar.scrolled {
+            background: rgba(15, 15, 15, 0.95) !important;
+            backdrop-filter: blur(30px) !important;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* CUSTOM SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-gradient);
+        }
+
+        /* ACCESSIBILITY IMPROVEMENTS */
+        .nav-link:focus,
+        .navbar-brand:focus {
+            outline: 2px solid var(--futuristic-cyan);
+            outline-offset: 2px;
+        }
+
+        /* PARTICLE EFFECT BACKGROUND */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(212, 175, 55, 0.3), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(138, 43, 226, 0.3), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(0, 255, 255, 0.3), transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(240, 147, 251, 0.3), transparent);
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: particleFloat 20s linear infinite;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-200px); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'peta-utama' %}">PetaRasa YK</a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'peta-utama' %}">🗺️ Peta</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'daftar-jalur-rasa' %}">🛤️ Jalur Rasa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'halaman-saran' %}">📩 Saran Kuliner</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="text-center py-3">
+        <p>&copy; 2025 PetaRasa YK - Jelajahi Cita Rasa Nusantara 🇮🇩</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navbar scroll effect
+            const navbar = document.querySelector('.navbar');
+            let scrolled = false;
+
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50 && !scrolled) {
+                    navbar.classList.add('scrolled');
+                    scrolled = true;
+                } else if (window.scrollY <= 50 && scrolled) {
+                    navbar.classList.remove('scrolled');
+                    scrolled = false;
+                }
+            });
+
+            // Active nav link highlighting
+            const currentLocation = location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentLocation) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Mobile menu auto-close on link click
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (navbarCollapse.classList.contains('show')) {
+                        navbarToggler.click();
+                    }
+                });
+            });
+
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Add loading class removal
+            setTimeout(() => {
+                document.body.classList.add('loaded');
+            }, 100);
+
+            // Enhanced ripple effect for nav links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    let ripple = document.createElement('span');
+                    ripple.classList.add('ripple-effect');
+                    
+                    let rect = this.getBoundingClientRect();
+                    let size = Math.max(rect.width, rect.height);
+                    let x = e.clientX - rect.left - size / 2;
+                    let y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255, 255, 255, 0.3);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+
+        // CSS for ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

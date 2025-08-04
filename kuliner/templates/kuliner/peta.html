@@ -1,0 +1,650 @@
+{% extends "kuliner/base.html" %}
+{% load static %} 
+
+{% block title %}Peta Utama - PetaRasa YK{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --traditional-gold: #d4af37;
+        --traditional-bronze: #cd7f32;
+        --futuristic-cyan: #00ffff;
+        --futuristic-purple: #8a2be2;
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --text-light: #ffffff;
+        --text-dark: #333333;
+    }
+
+    .map-container {
+        position: relative;
+        padding: 20px 0;
+    }
+
+    .hero-banner {
+        background: var(--glass-bg);
+        backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 40px;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-banner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .hero-banner:hover::before {
+        left: 100%;
+    }
+
+    .hero-title {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--traditional-gold), var(--futuristic-cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .hero-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 3px;
+        background: var(--secondary-gradient);
+        border-radius: 3px;
+        animation: titleUnderline 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleUnderline {
+        0% { width: 100px; }
+        100% { width: 140px; }
+    }
+
+    .hero-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.2rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .search-controls {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-input, .area-select {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 15px 20px;
+        color: var(--text-light);
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus, .area-select:focus {
+        outline: none;
+        border-color: var(--futuristic-cyan);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .search-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+        font-style: italic;
+    }
+
+    .area-select option {
+        background: var(--dark-bg);
+        color: var(--text-light);
+        padding: 10px;
+    }
+
+    #map {
+        height: 75vh;
+        border-radius: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    #map:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 35px 70px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ENHANCED POPUP STYLES */
+    .leaflet-popup-content-wrapper {
+        background: var(--glass-bg) !important;
+        backdrop-filter: blur(25px) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .leaflet-popup-content {
+        margin: 0 !important; 
+        width: 280px !important;
+        max-width: 280px !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .leaflet-popup-tip {
+        background: var(--glass-bg) !important;
+        backdrop-filter: blur(25px) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        border-top: none !important;
+        border-right: none !important;
+    }
+
+    .popup-card {
+        position: relative;
+        overflow: hidden;
+        background: transparent;
+    }
+
+    .popup-image-container {
+        position: relative;
+        height: 140px;
+        overflow: hidden;
+        border-radius: 15px 15px 0 0;
+    }
+
+    .popup-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: all 0.3s ease;
+    }
+
+    .popup-card:hover img {
+        transform: scale(1.1);
+    }
+
+    .popup-image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(212, 175, 55, 0.3), rgba(138, 43, 226, 0.3));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .popup-card:hover .popup-image-overlay {
+        opacity: 1;
+    }
+
+    .popup-content {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .popup-card h5 {
+        font-family: 'Lora', serif !important;
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        margin: 0 0 15px 0 !important;
+        color: var(--traditional-gold) !important;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+        line-height: 1.3 !important;
+    }
+
+    .popup-badges {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+
+    .popup-badge {
+        background: var(--secondary-gradient);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .popup-detail-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px !important;
+        background: var(--success-gradient) !important;
+        color: white !important;
+        text-decoration: none !important;
+        border-radius: 15px !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3) !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0 !important;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .popup-detail-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.3s ease;
+    }
+
+    .popup-detail-btn:hover::before {
+        left: 100%;
+    }
+
+    .popup-detail-btn:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4) !important;
+        color: white !important;
+    }
+
+    .popup-detail-btn:active {
+        transform: translateY(-1px) !important;
+    }
+
+    /* CUSTOM LEAFLET CONTROLS */
+    .leaflet-control-zoom a {
+        background: var(--glass-bg) !important;
+        backdrop-filter: blur(15px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: var(--text-light) !important;
+        font-weight: bold !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .leaflet-control-zoom a:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        transform: scale(1.1) !important;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .leaflet-control-attribution {
+        background: var(--glass-bg) !important;
+        backdrop-filter: blur(15px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 10px !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    .leaflet-control-attribution a {
+        color: var(--futuristic-cyan) !important;
+    }
+
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 768px) {
+        .hero-banner {
+            padding: 25px 20px;
+            margin-bottom: 20px;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+
+        .search-controls {
+            padding: 20px;
+        }
+
+        .search-input, .area-select {
+            padding: 12px 16px;
+            font-size: 0.9rem;
+        }
+
+        #map {
+            height: 60vh;
+            border-radius: 15px;
+        }
+
+        .leaflet-popup-content {
+            width: 240px !important;
+            max-width: 240px !important;
+        }
+
+        .popup-content {
+            padding: 15px;
+        }
+
+        .popup-card h5 {
+            font-size: 1rem !important;
+        }
+
+        .popup-detail-btn {
+            padding: 10px 20px !important;
+            font-size: 0.8rem !important;
+        }
+
+        .popup-image-container {
+            height: 120px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-banner {
+            padding: 20px 15px;
+        }
+
+        .search-controls {
+            padding: 15px;
+        }
+
+        #map {
+            height: 50vh;
+        }
+
+        .leaflet-popup-content {
+            width: 220px !important;
+            max-width: 220px !important;
+        }
+    }
+
+    /* LOADING ANIMATIONS */
+    .hero-banner, .search-controls, #map {
+        opacity: 0;
+        animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .search-controls { animation-delay: 0.2s; }
+    #map { animation-delay: 0.4s; }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* SEARCH FEEDBACK */
+    .search-feedback {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 15px;
+        padding: 20px;
+        color: var(--text-light);
+        text-align: center;
+        z-index: 1000;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .search-feedback.show {
+        opacity: 1;
+    }
+
+    /* ENHANCED MARKER CLUSTERING */
+    .marker-cluster {
+        background: var(--primary-gradient) !important;
+        border: 3px solid rgba(255, 255, 255, 0.3) !important;
+        border-radius: 50% !important;
+        color: white !important;
+        font-weight: bold !important;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .marker-cluster:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4) !important;
+    }
+</style>
+
+<div class="map-container">
+    <div class="container">
+        <div class="hero-banner">
+            <h1 class="hero-title">🗺️ Temukan Cita Rasa Asli Yogyakarta</h1>
+            <p class="hero-subtitle">
+                Jelajahi peta kuliner tradisional, temukan permata tersembunyi, dan dukung usaha lokal bersama <strong>PetaRasa YK</strong>. 
+                <br>🍜 Mari lestarikan warisan kuliner Nusantara! 🇮🇩
+            </p>
+        </div>    
+
+        <div class="search-controls">
+            <form id="search-form" class="row g-3">
+                <div class="col-12 col-md-8">
+                    <input type="search" 
+                           class="form-control search-input" 
+                           id="search-input" 
+                           name="q"
+                           placeholder="🔍 Cari gudeg, sate, atau nama tempat...">
+                </div>
+                <div class="col-12 col-md-4">
+                    <select class="form-select area-select" id="area-filter">
+                        <option value="">📍 Semua Area</option>
+                        <option value="KOTA">🏛️ Kota Yogyakarta</option>
+                        <option value="SLEMAN">🏔️ Sleman</option>
+                        <option value="BANTUL">🌾 Bantul</option>
+                        <option value="KULONPROGO">🌊 Kulon Progo</option>
+                        <option value="GUNUNGKIDUL">⛰️ Gunungkidul</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <div style="position: relative;">
+            <div id="map"></div>
+            <div id="search-feedback" class="search-feedback">
+                </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // URL disiapkan di awal menggunakan template Django untuk keamanan dan kejelasan
+    const baseUrl = "{% url 'get-lokasi-json' %}";
+    const defaultFotoUrl = "{% static 'kuliner/images/default-image.png' %}";
+
+    // Initialize map dengan semua kontrol yang diperlukan
+    const map = L.map('map', {
+        zoomControl: true,
+        attributionControl: true
+    }).setView([-7.7956, 110.3695], 13); // Tampilan awal seluruh Yogyakarta
+
+    // Tile layer dengan gaya yang sesuai
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        opacity: 0.8
+    }).addTo(map);
+
+    const markerGroup = L.layerGroup().addTo(map);
+
+    // Ikon marker kustom sesuai dengan style Anda
+    const customIcon = L.divIcon({
+        className: 'custom-marker',
+        html: `
+            <div style="
+                background: var(--secondary-gradient);
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                border: 3px solid white;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 16px;
+            ">🍜</div>
+        `,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+    });
+
+    /**
+     * Fungsi untuk memuat marker ke peta.
+     * @param {string} url - URL API untuk mengambil data lokasi.
+     * @param {boolean} isInitialLoad - Penanda apakah ini pemuatan awal halaman.
+     */
+    function loadMarkers(url, isInitialLoad = false) {
+        markerGroup.clearLayers();
+        const mapElement = document.getElementById('map');
+        mapElement.style.opacity = '0.7';
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                mapElement.style.opacity = '1';
+                
+                if (!data || data.length === 0) {
+                    showSearchFeedback('🔍 Tidak ada hasil ditemukan');
+                    return;
+                }
+
+                data.forEach(lokasi => {
+                    const detailUrl = `/lokasi/${lokasi.id}/`;
+                    const fotoUrl = lokasi.foto_url || defaultFotoUrl; // FIX: Menggunakan variabel, bukan tag Django
+                    
+                    const popupContent = `
+                        <div class="popup-card">
+                            <div class="popup-image-container">
+                                <img src="${fotoUrl}" alt="Foto ${lokasi.nama}" onerror="this.onerror=null; this.src='${defaultFotoUrl}';">
+                                <div class="popup-image-overlay"></div>
+                            </div>
+                            <div class="popup-content">
+                                <h5>${lokasi.nama}</h5>
+                                <div class="popup-badges">
+                                    ${lokasi.is_produk_lokal ? '<span class="popup-badge">🏪 Lokal</span>' : ''}
+                                    ${lokasi.is_resep_asli ? '<span class="popup-badge">📜 Otentik</span>' : ''}
+                                </div>
+                                <a href="${detailUrl}" class="popup-detail-btn">
+                                    <span>👀</span>
+                                    <span>Lihat Detail</span>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+
+                    const marker = L.marker([lokasi.latitude, lokasi.longitude], {
+                        icon: customIcon
+                    }).addTo(markerGroup);
+                    
+                    marker.bindPopup(popupContent, {
+                        maxWidth: 300,
+                        className: 'custom-popup'
+                    });
+                });
+
+                // FIX: Hanya jalankan fitBounds jika BUKAN pemuatan awal dan ada data
+                if (!isInitialLoad && data.length > 0) {
+                    const group = new L.featureGroup(markerGroup.getLayers());
+                    map.fitBounds(group.getBounds().pad(0.1));
+                }
+            })
+            .catch(error => {
+                console.error('Gagal memuat data lokasi:', error);
+                mapElement.style.opacity = '1';
+                showSearchFeedback('⚠️ Terjadi kesalahan saat memuat data');
+            });
+    }
+
+    // Fungsi untuk menampilkan pesan di div #search-feedback
+    function showSearchFeedback(message) {
+        const feedback = document.getElementById('search-feedback');
+        feedback.innerHTML = `<h5>${message}</h5><p>Coba gunakan kata kunci atau filter yang berbeda.</p>`;
+        feedback.classList.add('show');
+        
+        setTimeout(() => { feedback.classList.remove('show'); }, 4000);
+    }
+    
+    // Fungsi filter dengan URLSearchParams yang aman
+    function applyFilters() {
+        const query = document.getElementById('search-input').value;
+        const area = document.getElementById('area-filter').value;
+        
+        const params = new URLSearchParams();
+        if (query) params.append('q', query);
+        if (area) params.append('area', area);
+        
+        const searchUrl = `${baseUrl}?${params.toString()}`;
+        
+        // Panggil tanpa argumen kedua, agar `isInitialLoad` menjadi false dan `fitBounds` berjalan
+        loadMarkers(searchUrl); 
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('search-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        applyFilters();
+    });
+
+    // Menambahkan 'debounce' untuk performa lebih baik
+    let searchTimeout;
+    document.getElementById('search-input').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(applyFilters, 500); // Tunda request selama 500ms
+    });
+
+    document.getElementById('area-filter').addEventListener('change', applyFilters);
+    
+    // --- Initial Load ---
+    // Panggil dengan argumen kedua `true` untuk mencegah `fitBounds` di awal
+    loadMarkers(baseUrl, true);
+</script>
+
+{% endblock %}

@@ -1,0 +1,616 @@
+{% extends "kuliner/base.html" %}
+
+{% block title %}{{ lokasi.nama }} - PetaRasa YK{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --traditional-gold: #d4af37;
+        --traditional-bronze: #cd7f32;
+        --futuristic-cyan: #00ffff;
+        --futuristic-purple: #8a2be2;
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --text-light: #ffffff;
+        --text-dark: #333333;
+    }
+
+    .modern-container {
+        background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+
+    .modern-row {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .futuristic-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        color: var(--text-light);
+    }
+
+    .futuristic-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .futuristic-card:hover::before {
+        left: 100%;
+    }
+
+    .futuristic-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-title {
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--traditional-gold), var(--futuristic-cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 20px;
+        text-align: center;
+        position: relative;
+    }
+
+    .hero-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: var(--secondary-gradient);
+        border-radius: 3px;
+    }
+
+    .modern-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+
+    .neon-badge {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 25px;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-light);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .neon-badge.success {
+        border-color: #00ff00;
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+
+    .neon-badge.warning {
+        border-color: var(--traditional-gold);
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .neon-badge:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+    }
+
+    .image-showcase {
+        position: relative;
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 30px 0;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .image-showcase:hover {
+        transform: scale(1.02);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .image-showcase img {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        transition: all 0.3s ease;
+    }
+
+    .image-showcase::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(212, 175, 55, 0.2), rgba(138, 43, 226, 0.2));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .image-showcase:hover::after {
+        opacity: 1;
+    }
+
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--traditional-gold);
+        margin: 25px 0 15px 0;
+        position: relative;
+        display: inline-block;
+    }
+
+    .section-header::before {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--secondary-gradient);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .section-header:hover::before {
+        transform: scaleX(1);
+    }
+
+    .content-text {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+        line-height: 1.8;
+        margin-bottom: 20px;
+    }
+
+    .cyber-button {
+        background: var(--secondary-gradient);
+        border: none;
+        border-radius: 15px;
+        padding: 15px 30px;
+        color: white;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        justify-content: center;
+        margin: 20px 0;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .cyber-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .info-matrix {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
+    }
+
+    .info-cell {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .info-cell:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .info-cell h6 {
+        font-weight: 600;
+        color: var(--futuristic-cyan);
+        margin-bottom: 8px;
+    }
+
+    .info-cell p {
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0;
+    }
+
+    .review-portal {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .review-portal h4 {
+        color: var(--traditional-gold);
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .form-field {
+        margin-bottom: 20px;
+    }
+
+    .field-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--traditional-gold);
+    }
+
+    .cyber-input, .cyber-select, .cyber-textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .cyber-input:focus, .cyber-select:focus, .cyber-textarea:focus {
+        outline: none;
+        border-color: var(--futuristic-cyan);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .submit-portal {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 15px;
+        padding: 15px 30px;
+        color: white;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .submit-portal:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .review-matrix {
+        background: var(--glass-bg);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .review-matrix::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 2px;
+        background: var(--secondary-gradient);
+        transition: left 0.5s ease;
+    }
+
+    .review-matrix:hover::before {
+        left: 100%;
+    }
+
+    .review-matrix:hover {
+        transform: translateX(10px);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .reviewer-id {
+        font-weight: 700;
+        color: var(--traditional-gold);
+        font-size: 1.1rem;
+    }
+
+    .rating-display {
+        background: var(--secondary-gradient);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: white;
+    }
+
+    .timestamp {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+
+    .review-content {
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.6;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        background: var(--glass-bg);
+        border-radius: 15px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .modern-row {
+            padding: 0 15px;
+        }
+
+        .futuristic-card {
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .info-matrix {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .review-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .image-showcase img {
+            height: 250px;
+        }
+
+        .cyber-button {
+            padding: 12px 20px;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .futuristic-card {
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .hero-title {
+            font-size: 1.8rem;
+        }
+
+        .image-showcase img {
+            height: 200px;
+        }
+
+        .review-portal, .review-matrix {
+            padding: 20px;
+        }
+    }
+
+    /* Loading Animation */
+    .fade-in {
+        opacity: 0;
+        animation: fadeInUp 0.8s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in:nth-child(1) { animation-delay: 0.1s; }
+    .fade-in:nth-child(2) { animation-delay: 0.2s; }
+    .fade-in:nth-child(3) { animation-delay: 0.3s; }
+</style>
+
+<div class="modern-container">
+    <div class="modern-row">
+        <div class="futuristic-card fade-in">
+            <h1 class="hero-title">{{ lokasi.nama }}</h1>
+            
+            <div class="modern-badges">
+                {% if lokasi.is_produk_lokal %}
+                    <span class="neon-badge success">✅ Produk Lokal</span>
+                {% endif %}
+                {% if lokasi.is_resep_asli %}
+                    <span class="neon-badge warning">📜 Resep Asli</span>
+                {% endif %}
+            </div>
+
+            <hr style="border-color: rgba(255, 255, 255, 0.2); margin: 30px 0;">
+
+            <div class="image-showcase">
+                {% if lokasi.foto_utama %}
+                    <img src="{{ lokasi.foto_utama.url }}" alt="Foto {{ lokasi.nama }}">
+                {% endif %}
+            </div>
+
+            <h5 class="section-header">📍 Alamat</h5>
+            <p class="content-text">{{ lokasi.alamat }}</p>
+            
+            <a href="https://www.google.com/maps/dir/?api=1&destination={{ lokasi.latitude }},{{ lokasi.longitude }}" 
+               class="cyber-button" 
+               target="_blank" 
+               rel="noopener noreferrer">
+                🗺️ Buka Petunjuk Arah di Google Maps
+            </a>
+
+            <h5 class="section-header">📝 Deskripsi</h5>
+            <p class="content-text">{{ lokasi.deskripsi|linebreaks }}</p>
+
+            <hr style="border-color: rgba(255, 255, 255, 0.2); margin: 30px 0;">
+
+            <div class="info-matrix">
+                <div class="info-cell">
+                    <h6>🕒 Jam Buka</h6>
+                    <p>{{ lokasi.jam_buka|default:"Informasi belum tersedia" }}</p>
+                </div>
+                <div class="info-cell">
+                    <h6>💰 Rentang Harga</h6>
+                    <p>{{ lokasi.rentang_harga|default:"Informasi belum tersedia" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="futuristic-card fade-in">
+            <div class="review-portal">
+                <h4>✍️ Beri Ulasan Anda</h4>
+                <form action="{% url 'tambah-ulasan' lokasi.pk %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-field">
+                        <label for="nama_pengulas" class="field-label">Nama Anda:</label>
+                        <input type="text" class="cyber-input" id="nama_pengulas" name="nama_pengulas" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="rating" class="field-label">Rating (1-5):</label>
+                        <select class="cyber-select" id="rating" name="rating" required>
+                            <option value="5">⭐⭐⭐⭐⭐ 5 Bintang (Luar Biasa)</option>
+                            <option value="4">⭐⭐⭐⭐ 4 Bintang (Enak)</option>
+                            <option value="3">⭐⭐⭐ 3 Bintang (Cukup)</option>
+                            <option value="2">⭐⭐ 2 Bintang (Kurang)</option>
+                            <option value="1">⭐ 1 Bintang (Buruk)</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="komentar" class="field-label">Komentar Anda:</label>
+                        <textarea class="cyber-textarea" id="komentar" name="komentar" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-portal">🚀 Kirim Ulasan</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="futuristic-card fade-in">
+            <h2 class="section-header">💬 Ulasan Pengunjung</h2>
+
+            {% for ulasan in lokasi.ulasan.all %}
+                <div class="review-matrix">
+                    <div class="review-header">
+                        <h5 class="reviewer-id">{{ ulasan.nama_pengulas }}</h5>
+                        <span class="rating-display">⭐ {{ ulasan.rating }}/5</span>
+                    </div>
+                    <small class="timestamp">
+                        Pada: {{ ulasan.dibuat_pada|date:"d F Y" }}
+                    </small>
+                    <p class="review-content">{{ ulasan.komentar }}</p>
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <p>Belum ada ulasan untuk tempat ini. Jadilah yang pertama! 🎯</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth loading animation
+        const cards = document.querySelectorAll('.fade-in');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 200);
+        });
+
+        // Form enhancement
+        const formInputs = document.querySelectorAll('.cyber-input, .cyber-select, .cyber-textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Scroll reveal animation for reviews
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateX(0)';
+                }
+            });
+        });
+
+        document.querySelectorAll('.review-matrix').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateX(-30px)';
+            observer.observe(card);
+        });
+    });
+</script>
+{% endblock %}
