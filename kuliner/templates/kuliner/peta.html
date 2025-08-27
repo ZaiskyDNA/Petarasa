@@ -533,11 +533,6 @@
         iconAnchor: [15, 15]
     });
 
-    /**
-     * Fungsi untuk memuat marker ke peta.
-     * @param {string} url - URL API untuk mengambil data lokasi.
-     * @param {boolean} isInitialLoad - Penanda apakah ini pemuatan awal halaman.
-     */
     function loadMarkers(url, isInitialLoad = false) {
         markerGroup.clearLayers();
         const mapElement = document.getElementById('map');
@@ -549,6 +544,7 @@
                 return response.json();
             })
             .then(data => {
+                console.log("Data yang diterima dari server:", data);
                 mapElement.style.opacity = '1';
                 
                 if (!data || data.length === 0) {
@@ -558,7 +554,7 @@
 
                 data.forEach(lokasi => {
                     const detailUrl = `/lokasi/${lokasi.id}/`;
-                    const fotoUrl = lokasi.foto_url || defaultFotoUrl; // FIX: Menggunakan variabel, bukan tag Django
+                    const fotoUrl = lokasi.foto_url || defaultFotoUrl; 
                     
                     const popupContent = `
                         <div class="popup-card">

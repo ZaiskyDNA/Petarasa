@@ -1,25 +1,23 @@
 import os
 from pathlib import Path
-import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # ==============================================================================
-# PENGATURAN KUNCI UNTUK PRODUKSI & LOKAL
+# PENGATURAN KUNCI UNTUK PENGEMBANGAN LOKAL
 # ==============================================================================
 
-# SECRET_KEY dibaca dari environment variable di hosting.
-# Untuk lokal, gunakan kunci default jika tidak ada.
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-_x8wn627c*@!9ulq5@$)b1+ix3g6_js^9)zmkr47k!v$vzn6!j')
+# Kunci rahasia untuk pengembangan lokal.
+# Anda tidak perlu menyembunyikannya saat bekerja di komputer sendiri.
+SECRET_KEY = 'django-insecure-_x8wn627c*@!9ulq5@$)b1+ix3g6_js^9)zmkr47k!v$vzn6!j'
 
-# DEBUG akan otomatis False di hosting, dan True di lokal (jika tidak diatur).
-DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
+# DEBUG=True mengaktifkan halaman error yang detail saat development.
+DEBUG = True
 
-# ALLOWED_HOSTS untuk lokal dan hosting 
-ALLOWED_HOSTS = ['petarasa.vercel.app',' petarasa-dnxfq1r1q-zaiskydnas-projects.vercel.app']
-
+# Untuk lokal, ALLOWED_HOSTS bisa dikosongkan.
+ALLOWED_HOSTS = []
 
 
 # ==============================================================================
@@ -34,13 +32,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'kuliner',
-    'cloudinary', 
-    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -75,16 +70,15 @@ WSGI_APPLICATION = 'petarasa_project.wsgi.application'
 
 
 # ==============================================================================
-# DATABASE
+# DATABASE LOKAL
 # ==============================================================================
 
-# Konfigurasi database ini akan menggunakan PostgreSQL di Railway
-# dan otomatis beralih ke SQLite di komputer lokal Anda.
+# Menggunakan SQLite, sebuah file database sederhana untuk pengembangan lokal.
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 
@@ -99,38 +93,32 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-LANGUAGE_CODE = 'id'  # Ubah ke Bahasa Indonesia
-TIME_ZONE = 'Asia/Jakarta'  # Ubah ke zona waktu Indonesia
+LANGUAGE_CODE = 'id'
+TIME_ZONE = 'Asia/Jakarta'
 USE_I18N = True
 USE_TZ = True
 
 
 # ==============================================================================
-# FILE STATIS & MEDIA
+# FILE STATIS & MEDIA (UNTUK LOKAL)
 # ==============================================================================
 
 # Pengaturan untuk file CSS, JavaScript, dll.
 STATIC_URL = 'static/'
-# Folder tempat 'collectstatic' akan mengumpulkan semua file statis untuk produksi.
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-# Direktori tambahan tempat Django akan mencari file statis.
-STATICFILES_DIRS = [BASE_DIR / 'kuliner/static']
+# Direktori tempat Django akan mencari file statis kustom Anda.
+STATICFILES_DIRS = [
+    BASE_DIR / 'kuliner/static',
+]
 
-# GANTI BLOK STORAGES ANDA DENGAN YANG INI:
-STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+# Pengaturan untuk file yang di-upload pengguna (gambar).
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# ==============================================================================
+# PENGATURAN LAINNYA
+# ==============================================================================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Pengaturan Cloudinary untuk Media Files
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dkwam4vpo',
-    'API_KEY': '435236318493894',
-    'API_SECRET': 'aCmlu2v0qd-fZAoYpaEq0oD1HfMQ',
-}
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

@@ -396,13 +396,109 @@
         color: rgba(255, 255, 255, 0.7);
     }
 
+    /* Journey Progress Bar */
+    .journey-progress {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 30px;
+        color: var(--text-light);
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .progress-header h6 {
+        color: var(--traditional-gold);
+        margin: 0;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .progress-header small {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .cyber-progress {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        height: 8px;
+        margin: 15px 0;
+        overflow: hidden;
+    }
+
+    .cyber-progress-bar {
+        background: var(--secondary-gradient);
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.8s ease;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .journey-navigation {
+        display: flex;
+        gap: 15px;
+        justify-content: space-between;
+        margin-top: 15px;
+    }
+
+    .nav-btn {
+        background: var(--glass-bg);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        padding: 10px 20px;
+        color: var(--text-light);
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .nav-btn.primary {
+        background: var(--primary-gradient);
+        border-color: transparent;
+    }
+
+    .nav-btn.exit-btn {
+        background: rgba(220, 53, 69, 0.2);
+        border-color: rgba(220, 53, 69, 0.5);
+        flex: none;
+    }
+
+    .nav-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
     /* Mobile Responsive */
     @media (max-width: 768px) {
         .modern-row {
             padding: 0 15px;
         }
 
-        .futuristic-card {
+        .futuristic-card, .journey-progress {
             padding: 20px;
             margin-bottom: 20px;
         }
@@ -426,14 +522,25 @@
             height: 250px;
         }
 
-        .cyber-button {
+        .cyber-button, .nav-btn {
             padding: 12px 20px;
             font-size: 0.9rem;
+        }
+
+        .journey-navigation {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .progress-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
         }
     }
 
     @media (max-width: 480px) {
-        .futuristic-card {
+        .futuristic-card, .journey-progress {
             padding: 15px;
             border-radius: 15px;
         }
@@ -475,6 +582,37 @@
 
 <div class="modern-container">
     <div class="modern-row">
+        <!-- Journey Progress Bar (akan muncul jika sedang dalam perjalanan) -->
+        <div id="journeyProgress" class="journey-progress fade-in" style="display: none;">
+            <div class="progress-header">
+                <div>
+                    <h6>
+                        <i class="fas fa-route"></i>
+                        <span id="journeyName">Perjalanan Kuliner</span>
+                    </h6>
+                    <small>
+                        Lokasi <span id="currentStep">1</span> dari <span id="totalSteps">5</span>
+                    </small>
+                </div>
+                <button class="nav-btn exit-btn" onclick="exitJourney()">
+                    <i class="fas fa-times"></i> Keluar
+                </button>
+            </div>
+            <div class="cyber-progress">
+                <div class="cyber-progress-bar" id="progressBar" style="width: 20%"></div>
+            </div>
+            <div class="journey-navigation">
+                <button class="nav-btn" id="prevBtn" onclick="prevLokasi()" disabled>
+                    <i class="fas fa-chevron-left"></i> Sebelumnya
+                </button>
+                <button class="nav-btn primary" onclick="nextLokasi()">
+                    <span id="nextBtnText">Lanjut ke Lokasi Berikutnya</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        <!-- End of Journey Progress Bar -->
+         
         <div class="futuristic-card fade-in">
             <h1 class="hero-title">{{ lokasi.nama }}</h1>
             
@@ -498,10 +636,10 @@
             <h5 class="section-header">📍 Alamat</h5>
             <p class="content-text">{{ lokasi.alamat }}</p>
             
-            <a href="https://www.google.com/maps/dir/?api=1&destination={{ lokasi.latitude }},{{ lokasi.longitude }}" 
-               class="cyber-button" 
-               target="_blank" 
-               rel="noopener noreferrer">
+            <a href="https://www.google.com/maps/dir/?api=1&destination={{ lokasi.latitude_str }},{{ lokasi.longitude_str }}"
+            class="cyber-button"
+            target="_blank"
+            rel="noopener noreferrer">
                 🗺️ Buka Petunjuk Arah di Google Maps
             </a>
 
@@ -574,7 +712,115 @@
 </div>
 
 <script>
+    // Journey Navigation Functions
+    function nextLokasi() {
+        const perjalanan = JSON.parse(sessionStorage.getItem('currentJalur'));
+        
+        if (perjalanan) {
+            perjalanan.currentLokasiIndex++;
+            
+            if (perjalanan.currentLokasiIndex < perjalanan.lokasi.length) {
+                // Masih ada lokasi berikutnya
+                sessionStorage.setItem('currentJalur', JSON.stringify(perjalanan));
+                window.location.href = perjalanan.lokasi[perjalanan.currentLokasiIndex].url;
+            } else {
+                // Perjalanan selesai
+                sessionStorage.removeItem('currentJalur');
+                
+                // Show completion modal dengan animasi
+                const modal = document.createElement('div');
+                modal.innerHTML = `
+                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 20px; text-align: center; max-width: 400px; margin: 20px; animation: scaleIn 0.5s ease;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
+                            <h3 style="color: white; margin-bottom: 1rem;">Selamat!</h3>
+                            <p style="color: white; margin-bottom: 1.5rem;">Anda telah menyelesaikan perjalanan kuliner: <strong>${perjalanan.nama}</strong></p>
+                            <p style="color: rgba(255,255,255,0.9); margin-bottom: 2rem; font-size: 0.9rem;">Terima kasih telah menjelajahi cita rasa Yogyakarta bersama PetaRasa YK!</p>
+                            <button onclick="window.location.href='/jalur-rasa/'" style="background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
+                                Jelajahi Jalur Lainnya
+                            </button>
+                        </div>
+                    </div>
+                `;
+                // Add animation styles
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes scaleIn {
+                        from { transform: scale(0.5); opacity: 0; }
+                        to { transform: scale(1); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+                document.body.appendChild(modal);
+            }
+        }
+    }
+
+    function prevLokasi() {
+        const perjalanan = JSON.parse(sessionStorage.getItem('currentJalur'));
+        
+        if (perjalanan && perjalanan.currentLokasiIndex > 0) {
+            perjalanan.currentLokasiIndex--;
+            sessionStorage.setItem('currentJalur', JSON.stringify(perjalanan));
+            window.location.href = perjalanan.lokasi[perjalanan.currentLokasiIndex].url;
+        }
+    }
+
+    function exitJourney() {
+        if (confirm('🚪 Apakah Anda yakin ingin keluar dari perjalanan kuliner ini?')) {
+            sessionStorage.removeItem('currentJalur');
+            const progressElement = document.getElementById('journeyProgress');
+            progressElement.style.opacity = '0';
+            progressElement.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                progressElement.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    // Document Ready Functions
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Journey Progress
+        const perjalanan = JSON.parse(sessionStorage.getItem('currentJalur'));
+        
+        if (perjalanan) {
+            // Tampilkan progress bar dengan animasi
+            const progressElement = document.getElementById('journeyProgress');
+            progressElement.style.display = 'block';
+            setTimeout(() => {
+                progressElement.style.opacity = '1';
+                progressElement.style.transform = 'translateY(0)';
+            }, 100);
+            
+            // Update informasi perjalanan
+            document.getElementById('journeyName').textContent = perjalanan.nama;
+            document.getElementById('currentStep').textContent = perjalanan.currentLokasiIndex + 1;
+            document.getElementById('totalSteps').textContent = perjalanan.lokasi.length;
+            
+            // Update progress bar dengan animasi
+            const progressPercent = ((perjalanan.currentLokasiIndex + 1) / perjalanan.lokasi.length) * 100;
+            setTimeout(() => {
+                document.getElementById('progressBar').style.width = progressPercent + '%';
+            }, 500);
+            
+            // Update tombol navigasi
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtnText = document.getElementById('nextBtnText');
+            
+            // Enable/disable tombol previous
+            if (perjalanan.currentLokasiIndex > 0) {
+                prevBtn.disabled = false;
+            }
+            
+            // Update text tombol next
+            if (perjalanan.currentLokasiIndex < perjalanan.lokasi.length - 1) {
+                const nextLokasi = perjalanan.lokasi[perjalanan.currentLokasiIndex + 1];
+                nextBtnText.textContent = 'Lanjut ke: ' + nextLokasi.nama;
+            } else {
+                nextBtnText.textContent = '🏁 Selesaikan Perjalanan';
+            }
+        }
+
         // Smooth loading animation
         const cards = document.querySelectorAll('.fade-in');
         cards.forEach((card, index) => {
