@@ -1,31 +1,22 @@
 import os
-import dj_database_url
-from dotenv import load_dotenv
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Muat environment variables dari file .env (hanya untuk development lokal)
-load_dotenv(os.path.join(BASE_DIR, '.env'))
-
 # ==============================================================================
-# PENGATURAN KUNCI & KEAMANAN UNTUK PRODUKSI
+# PENGATURAN KUNCI & KEAMANAN
 # ==============================================================================
 
-# SECRET_KEY diambil dari environment variable. JANGAN DITARUH DI SINI.
-SECRET_KEY = os.environ.get('SECRET_KEY')
+# PENTING: Ganti dengan secret key yang kuat dan acak untuk produksi!
+# Anda bisa membuatnya di https://djecrety.ir/
+SECRET_KEY = 'ganti-dengan-secret-key-anda-yang-sebenarnya'
 
-# DEBUG=False di produksi untuk keamanan. 
-# Nilainya diambil dari environment variable, defaultnya False.
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+# Matikan DEBUG di produksi untuk keamanan.
+DEBUG = False
 
-# ALLOWED_HOSTS akan diisi otomatis oleh Render.
-# Untuk lokal, Anda bisa menambahkan '127.0.0.1' jika perlu.
-ALLOWED_HOSTS = []
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+# Sesuaikan dengan username PythonAnywhere Anda.
+ALLOWED_HOSTS = ['petarasa.pythonanywhere.com', '127.0.0.1']
 
 
 # ==============================================================================
@@ -38,9 +29,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'cloudinary_storage', # Taruh sebelum staticfiles untuk manajemen file
+    'cloudinary_storage', # Untuk manajemen file media
     'django.contrib.staticfiles',
-    'cloudinary', # Taruh setelah staticfiles
+    'cloudinary',
     'kuliner',
     'crispy_forms',
     "crispy_bootstrap5",
@@ -48,7 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Middleware untuk WhiteNoise (file statis)
+    # WhiteNoise tidak diperlukan di PythonAnywhere
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -62,13 +53,13 @@ MIDDLEWARE = [
 # KONFIGURASI INTI DJANGO
 # ==============================================================================
 
-# Pastikan nama proyek Anda adalah 'petarasa_project'. Jika berbeda, sesuaikan.
+# Ganti 'petarasa_project' jika nama folder proyek Anda berbeda.
 ROOT_URLCONF = 'petarasa_project.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], # Tambahkan ini jika Anda punya template global
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -85,16 +76,19 @@ WSGI_APPLICATION = 'petarasa_project.wsgi.application'
 
 
 # ==============================================================================
-# DATABASE (Bisa untuk Lokal & Produksi)
+# DATABASE (Untuk PythonAnywhere)
 # ==============================================================================
 
-# Menggunakan dj_database_url untuk membaca konfigurasi database dari environment variable.
-# Jika tidak ada DATABASE_URL, akan menggunakan SQLite sebagai default untuk lokal.
+# Isi detail ini dari tab "Databases" di dashboard PythonAnywhere Anda.
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'nama-user-anda$default',
+        'USER': 'nama-user-anda',
+        'PASSWORD': 'password-mysql-anda',
+        'HOST': 'nama-user-anda.mysql.pythonanywhere-services.com',
+        'PORT': '3306',
+    }
 }
 
 
@@ -116,22 +110,20 @@ USE_TZ = True
 
 
 # ==============================================================================
-# FILE STATIS & MEDIA (Untuk Produksi & Lokal)
+# FILE STATIS & MEDIA
 # ==============================================================================
 
-# --- Konfigurasi File Statis (CSS, JS) untuk Produksi ---
+# --- Konfigurasi File Statis (CSS, JS) untuk PythonAnywhere ---
 STATIC_URL = '/static/'
 # Direktori tempat `collectstatic` akan mengumpulkan semua file statis.
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# Menggunakan WhiteNoise untuk menyimpan file statis yang terkompresi.
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-STATICFILES_DIRS = [
-    BASE_DIR / 'kuliner/static',
-]
+
 
 # --- Konfigurasi File Media (Upload Pengguna) menggunakan Cloudinary ---
-# MEDIA_URL dan MEDIA_ROOT tidak diperlukan saat menggunakan Cloudinary.
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# Anda perlu mengatur CLOUDINARY_URL sebagai environment variable di PythonAnywhere
+# atau menuliskannya langsung di sini jika tidak terlalu rahasia.
+# Contoh: CLOUDINARY_URL = 'cloudinary://key:secret@cloudname'
 CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL')
 
 
