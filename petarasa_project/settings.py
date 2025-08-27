@@ -1,23 +1,31 @@
 import os
+import dj_database_url
+from dotenv import load_dotenv
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Muat environment variables dari file .env (hanya untuk development lokal)
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # ==============================================================================
-# PENGATURAN KUNCI UNTUK PENGEMBANGAN LOKAL
+# PENGATURAN KUNCI & KEAMANAN UNTUK PRODUKSI
 # ==============================================================================
 
-# Kunci rahasia untuk pengembangan lokal.
-# Anda tidak perlu menyembunyikannya saat bekerja di komputer sendiri.
-SECRET_KEY = 'django-insecure-_x8wn627c*@!9ulq5@$)b1+ix3g6_js^9)zmkr47k!v$vzn6!j'
+# SECRET_KEY diambil dari environment variable. JANGAN DITARUH DI SINI.
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
-# DEBUG=True mengaktifkan halaman error yang detail saat development.
-DEBUG = True
+# DEBUG=False di produksi untuk keamanan. 
+# Nilainya diambil dari environment variable, defaultnya False.
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-# Untuk lokal, ALLOWED_HOSTS bisa dikosongkan.
+# ALLOWED_HOSTS akan diisi otomatis oleh Render.
+# Untuk lokal, Anda bisa menambahkan '127.0.0.1' jika perlu.
 ALLOWED_HOSTS = []
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 
 # ==============================================================================
@@ -30,12 +38,17 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage', # Taruh sebelum staticfiles untuk manajemen file
     'django.contrib.staticfiles',
+    'cloudinary', # Taruh setelah staticfiles
     'kuliner',
+    'crispy_forms',
+    "crispy_bootstrap5",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Middleware untuk WhiteNoise (file statis)
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -49,15 +62,17 @@ MIDDLEWARE = [
 # KONFIGURASI INTI DJANGO
 # ==============================================================================
 
+# Pastikan nama proyek Anda adalah 'petarasa_project'. Jika berbeda, sesuaikan.
 ROOT_URLCONF = 'petarasa_project.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'], # Tambahkan ini jika Anda punya template global
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -70,15 +85,16 @@ WSGI_APPLICATION = 'petarasa_project.wsgi.application'
 
 
 # ==============================================================================
-# DATABASE LOKAL
+# DATABASE (Bisa untuk Lokal & Produksi)
 # ==============================================================================
 
-# Menggunakan SQLite, sebuah file database sederhana untuk pengembangan lokal.
+# Menggunakan dj_database_url untuk membaca konfigurasi database dari environment variable.
+# Jika tidak ada DATABASE_URL, akan menggunakan SQLite sebagai default untuk lokal.
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600
+    )
 }
 
 
@@ -100,19 +116,23 @@ USE_TZ = True
 
 
 # ==============================================================================
-# FILE STATIS & MEDIA (UNTUK LOKAL)
+# FILE STATIS & MEDIA (Untuk Produksi & Lokal)
 # ==============================================================================
 
-# Pengaturan untuk file CSS, JavaScript, dll.
-STATIC_URL = 'static/'
-# Direktori tempat Django akan mencari file statis kustom Anda.
+# --- Konfigurasi File Statis (CSS, JS) untuk Produksi ---
+STATIC_URL = '/static/'
+# Direktori tempat `collectstatic` akan mengumpulkan semua file statis.
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Menggunakan WhiteNoise untuk menyimpan file statis yang terkompresi.
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [
     BASE_DIR / 'kuliner/static',
 ]
 
-# Pengaturan untuk file yang di-upload pengguna (gambar).
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# --- Konfigurasi File Media (Upload Pengguna) menggunakan Cloudinary ---
+# MEDIA_URL dan MEDIA_ROOT tidak diperlukan saat menggunakan Cloudinary.
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL')
 
 
 # ==============================================================================
