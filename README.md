@@ -24,3 +24,10 @@ Website ini menampilkan peta interaktif yang memudahkan pengguna untuk menemukan
 * **Database:** **MySQL** (dikonfigurasi untuk lingkungan produksi).
 * **Peta:** **Leaflet.js**, sebuah library peta interaktif open-source.
 * **Deployment:** Dihosting di **PythonAnywhere**.
+
+---
+## ## Galeri
+<img width="512" height="941" alt="Screenshot 2025-09-10 231534" src="https://github.com/user-attachments/assets/111fac61-666f-44f6-8c1d-3ab7011846f7" />
+
+<img width="1539" height="892" alt="image" src="https://github.com/user-attachments/assets/159229dc-cb12-435a-8db0-08605a7bf81c" />
+
